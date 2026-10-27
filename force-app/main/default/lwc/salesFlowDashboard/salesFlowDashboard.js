@@ -16,6 +16,31 @@ const shortMoney = (value) => new Intl.NumberFormat('pt-BR', {
 const asDate = (value) => value ? value.split('-').reverse().join('/') : 'Sem data';
 
 export default class SalesFlowDashboard extends NavigationMixin(LightningElement) {
+    // Default to dark mode for the SalesFlow workspace; keep the user's preference locally.
+    isDark = true;
+
+    connectedCallback() {
+        try {
+            this.isDark = window.localStorage.getItem('salesflow.crm.theme') !== 'light';
+        } catch (error) {
+            // Restricted browser storage must not prevent the dashboard from rendering.
+            this.isDark = true;
+        }
+    }
+
+    get themeClass() { return this.isDark ? 'salesflow theme-dark' : 'salesflow'; }
+    get themeToggleLabel() { return this.isDark ? 'Modo claro' : 'Modo escuro'; }
+    get themeIcon() { return this.isDark ? '☀' : '☾'; }
+
+    handleThemeToggle() {
+        this.isDark = !this.isDark;
+        try {
+            window.localStorage.setItem('salesflow.crm.theme', this.isDark ? 'dark' : 'light');
+        } catch (error) {
+            // The switch works in memory even if storage is unavailable.
+        }
+    }
+
     dashboard;
     wiredResult;
     errorMessage;
