@@ -1,0 +1,41 @@
+name: Bug report
+description: Reportar problema na prévia, no componente LWC ou no Apex
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: 'Não publique tokens, dados reais de clientes ou credenciais.'
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Ambiente
+      options:
+        - Prévia local HTML
+        - Salesforce Developer Edition
+        - Outro ambiente de desenvolvimento
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Passos para reproduzir
+      placeholder: '1. Abrir... 2. Clicar... 3. Observar...'
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Resultado esperado
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Resultado obtido (sem credenciais)
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs sanitizados / capturas
+      description: 'Remova IDs de sessão, Authorization headers e dados pessoais.'

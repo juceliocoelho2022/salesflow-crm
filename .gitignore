@@ -1,0 +1,34 @@
+# Salesforce DX — dados locais de sessão / autenticação
+.sf/
+.sfdx/
+.localdevserver/
+
+# IDE e sistema operacional
+.idea/
+.vscode/.local/
+.DS_Store
+Thumbs.db
+
+# Dependências e saídas
+node_modules/
+coverage/
+.nyc_output/
+.dist/
+dist/
+build/
+*.log
+*.zip
+
+# Segredos, chaves e credenciais
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+server.key
+server.crt
+*.jwt
+*.auth
+**/authFile.json

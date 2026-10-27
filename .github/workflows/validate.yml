@@ -1,0 +1,47 @@
+name: CI — validação estática
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: static-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static:
+    name: Estrutura, XML, JS e higiene do repositório
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verificar projeto
+        run: python scripts/validate.py
+      - name: Verificar sintaxe da prévia
+        run: node --check preview/app.js
+      - name: Verificar arquivos versionados potencialmente sensíveis
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git ls-files | grep -E '(^|/)(\.env($|\.)|\.sf/|\.sfdx/|authFile\.json$|.*\.(pem|p12|pfx|key)$)' | grep -v '\.env\.example$'; then
+            echo 'ERRO: arquivo de credencial encontrado entre arquivos versionados.'
+            exit 1
+          fi
+          echo 'OK: nenhum nome de arquivo de credencial esperado encontrado.'
+
+# Não é deploy e NÃO executa testes Apex: é necessário um org Salesforce autenticado.

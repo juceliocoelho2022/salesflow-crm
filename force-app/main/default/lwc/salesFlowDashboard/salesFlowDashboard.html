@@ -1,0 +1,55 @@
+<template>
+    <div class="salesflow">
+        <header class="topbar">
+            <div class="identity"><div class="logo">SF</div><div><strong>SalesFlow <span>CRM</span></strong><small>Salesforce Native App</small></div></div>
+            <div class="search"><lightning-icon icon-name="utility:search" size="x-small"></lightning-icon><input type="search" placeholder="Pesquisar clientes e oportunidades..." aria-label="Pesquisar clientes e oportunidades" value={query} oninput={handleSearch}></div>
+            <div class="header-actions"><lightning-button-icon icon-name="utility:refresh" alternative-text="Atualizar dados" onclick={handleRefresh}></lightning-button-icon><span class="live-pill"><span class="live-dot"></span> Dados reais da organização</span></div>
+        </header>
+        <div class="body-layout">
+            <aside class="sidebar" aria-label="Menu SalesFlow">
+                <p class="nav-label">MENU PRINCIPAL</p>
+                <button class="nav-btn" data-view="inicio" onclick={handleView}><lightning-icon icon-name="utility:home" size="x-small"></lightning-icon> Início</button>
+                <button class="nav-btn" data-view="clientes" onclick={handleView}><lightning-icon icon-name="standard:account" size="x-small"></lightning-icon> Clientes</button>
+                <button class="nav-btn" data-view="oportunidades" onclick={handleView}><lightning-icon icon-name="standard:opportunity" size="x-small"></lightning-icon> Oportunidades</button>
+                <button class="nav-btn" data-view="tarefas" onclick={handleView}><lightning-icon icon-name="standard:task" size="x-small"></lightning-icon> Tarefas</button>
+                <div class="side-caption">Salesforce DX · Apex · LWC</div>
+            </aside>
+            <main class="main-content">
+                <div class="page-heading"><div><span class="eyebrow">PAINEL COMERCIAL</span><h1>{pageTitle}</h1><p>Gerencie seu relacionamento comercial em um só lugar.</p></div>
+                    <div class="heading-actions"><lightning-button label="Novo cliente" onclick={handleNewAccount}></lightning-button><lightning-button variant="brand" label="Nova oportunidade" icon-name="utility:add" onclick={openOpportunityForm}></lightning-button></div>
+                </div>
+                <template if:true={isLoading}><div class="loading"><lightning-spinner alternative-text="Carregando dados" size="medium"></lightning-spinner></div></template>
+                <template if:true={errorMessage}><div class="error" role="alert">{errorMessage}<p>Conceda acesso aos objetos Account, Contact, Opportunity e Task; atualize a página após ajustar as permissões.</p></div></template>
+                <template if:true={dashboard}>
+                    <template if:true={isHome}>
+                        <section class="kpis" aria-label="Indicadores principais">
+                            <div class="kpi"><div class="kpi-icon blue">▦</div><div><p>Clientes</p><strong>{accountCount}</strong><small>Contas cadastradas</small></div></div>
+                            <div class="kpi"><div class="kpi-icon amber">◆</div><div><p>Oportunidades</p><strong>{opportunityCount}</strong><small>Todos os estágios</small></div></div>
+                            <div class="kpi"><div class="kpi-icon green">R$</div><div><p>Valor em andamento</p><strong>{openPipeline}</strong><small>Oportunidades abertas</small></div></div>
+                            <div class="kpi"><div class="kpi-icon purple">★</div><div><p>Vendas ganhas</p><strong>{wonRevenue}</strong><small>Histórico de oportunidades</small></div></div>
+                        </section>
+                        <section class="panel"><div class="section-heading"><div><h2>Funil de vendas</h2><p>Etapas ativas configuradas na sua organização Salesforce</p></div><span class="helper-chip">Até 150 registros recentes</span></div>
+                            <div class="kanban" role="list">
+                                <template for:each={boardColumns} for:item="stage">
+                                    <div key={stage.key} class={stage.columnClass} role="listitem">
+                                        <div class="stage-title"><strong>{stage.label}</strong><span>{stage.count}</span><small>{stage.formattedTotal}</small></div>
+                                        <template for:each={stage.cards} for:item="opp">
+                                            <div key={opp.id} class="opp-card"><button class="item-link" data-id={opp.id} data-object="Opportunity" onclick={handleRecord}>{opp.name}</button><p>{opp.accountName}</p><strong>{opp.formattedAmount}</strong><div class="opp-card-footer"><span>{opp.formattedDate}</span><lightning-button-menu icon-size="x-small" alternative-text="Mover para outra etapa" title="Mudar etapa" data-id={opp.id} onselect={handleStageChange} disabled={isSaving}><template for:each={opp.choices} for:item="choice"><lightning-menu-item key={choice.value} value={choice.value} label={choice.label}></lightning-menu-item></template></lightning-button-menu></div></div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                            <template if:false={hasOpportunities}><p class="empty">Nenhuma oportunidade encontrada. Crie a primeira em “Nova oportunidade”.</p></template>
+                        </section>
+                        <div class="bottom-grid"><section class="panel"><div class="section-heading"><h2>Oportunidades por etapa</h2></div><template for:each={stageReport} for:item="stage"><div class="bar-row" key={stage.value}><div class="bar-label"><span>{stage.label}</span><span>{stage.count} · {stage.formattedAmount}</span></div><div class="bar-track"><div class="bar-fill" style={stage.barStyle}></div></div></div></template><template if:false={hasOpportunities}><p class="empty">Sem dados para o gráfico.</p></template></section>
+                            <section class="panel"><div class="section-heading"><h2>Próximas tarefas</h2><button class="subtle-link" data-view="tarefas" onclick={handleView}>Ver todas</button></div><template if:true={hasTasks}><template for:each={taskRows} for:item="task"><div class="task-item" key={task.id}><div class="task-symbol">✓</div><div class="task-main"><strong>{task.subject}</strong><span>{task.status}</span></div><span class="due">{task.formattedDate}</span></div></template></template><template if:false={hasTasks}><p class="empty">Nenhuma tarefa pendente encontrada.</p></template></section></div>
+                    </template>
+                    <template if:true={isAccounts}><section class="panel"><div class="section-heading"><div><h2>Clientes recentes</h2><p>{accountCount} contas na organização · exibindo até 30</p></div></div><div class="table-scroll"><table class="data-table"><thead><tr><th>Nome</th><th>Setor</th><th>Telefone</th></tr></thead><tbody><template for:each={filteredAccounts} for:item="account"><tr key={account.id}><td><button class="item-link" data-id={account.id} data-object="Account" onclick={handleRecord}>{account.name}</button></td><td>{account.industry}</td><td>{account.phone}</td></tr></template></tbody></table></div><template if:false={hasAccounts}><p class="empty">Nenhuma conta encontrada.</p></template></section></template>
+                    <template if:true={isOpportunities}><section class="panel"><div class="section-heading"><div><h2>Oportunidades recentes</h2><p>{opportunityCount} oportunidades na organização · exibindo até 150</p></div></div><div class="table-scroll"><table class="data-table"><thead><tr><th>Oportunidade</th><th>Cliente</th><th>Etapa</th><th>Valor</th><th>Fechamento</th></tr></thead><tbody><template for:each={opportunityRows} for:item="opp"><tr key={opp.id}><td><button class="item-link" data-id={opp.id} data-object="Opportunity" onclick={handleRecord}>{opp.name}</button></td><td>{opp.accountName}</td><td><span class="status-pill">{opp.stage}</span></td><td>{opp.formattedAmount}</td><td>{opp.formattedDate}</td></tr></template></tbody></table></div><template if:false={hasOpportunities}><p class="empty">Nenhuma oportunidade encontrada.</p></template></section></template>
+                    <template if:true={isTasks}><section class="panel"><div class="section-heading"><div><h2>Tarefas pendentes</h2><p>Até 30 próximas atividades do Salesforce</p></div><lightning-button label="Nova tarefa" onclick={handleNewTask}></lightning-button></div><div class="table-scroll"><table class="data-table"><thead><tr><th>Assunto</th><th>Status</th><th>Prazo</th></tr></thead><tbody><template for:each={taskRows} for:item="task"><tr key={task.id}><td><button class="item-link" data-id={task.id} data-object="Task" onclick={handleRecord}>{task.subject}</button></td><td>{task.status}</td><td>{task.formattedDate}</td></tr></template></tbody></table></div><template if:false={hasTasks}><p class="empty">Nenhuma tarefa pendente encontrada.</p></template></section></template>
+                </template>
+            </main>
+        </div>
+        <template if:true={showForm}><div class="modal-backdrop"><section class="dialog" role="dialog" aria-modal="true" aria-label="Criar oportunidade"><div class="dialog-header"><h2>Nova oportunidade</h2><lightning-button-icon icon-name="utility:close" alternative-text="Fechar" onclick={closeOpportunityForm}></lightning-button-icon></div><lightning-record-edit-form object-api-name="Opportunity" onsuccess={handleCreated} onerror={handleFormError}><div class="dialog-body"><lightning-messages></lightning-messages><lightning-input-field field-name="Name" required></lightning-input-field><lightning-input-field field-name="AccountId"></lightning-input-field><lightning-input-field field-name="StageName" required></lightning-input-field><lightning-input-field field-name="CloseDate" required></lightning-input-field><lightning-input-field field-name="Amount"></lightning-input-field></div><div class="dialog-footer"><lightning-button label="Cancelar" onclick={closeOpportunityForm}></lightning-button><lightning-button type="submit" variant="brand" label="Salvar oportunidade"></lightning-button></div></lightning-record-edit-form></section></div></template>
+    </div>
+</template>
