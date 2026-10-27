@@ -1,6 +1,6 @@
 # Roadmap de evolução — SalesFlow CRM
 
-## v0.1.0 — MVP Salesforce (presente)
+## v0.1.0 — MVP Salesforce (base)
 
 - [x] Estrutura Salesforce DX
 - [x] Dashboard LWC e visualização do funil
@@ -13,12 +13,15 @@
 - [ ] Testes Apex executados numa org real
 - [ ] Captura de telas da aplicação instalada
 
-## v0.2.0 — CRM operacional
+## v0.2.0 — CRM operacional (código entregue, validação de org pendente)
 
-- [ ] Relacionar contatos e contas com navegação aprimorada
-- [ ] Filtros server-side e paginação de oportunidades
-- [ ] Busca server-side e ordenação
-- [ ] Atualização/criação de tarefas com status validado
+- [x] Consultar contatos relacionados a contas com busca e navegação no LWC
+- [x] Filtro por etapa e paginação SOQL no servidor para listagem de oportunidades (20 por página)
+- [x] Filtro de etapa, pesquisa por oportunidade/conta e paginação server-side SOQL
+- [x] Busca server-side com ordenação por modificação e Id
+- [x] Conclusão de tarefas com Apex e status fechado configurado pela org
+- [ ] Paginação por cursor/keyset para superar o limite de OFFSET 2.000
+- [ ] Atualização e criação de tarefas sem navegação para tela padrão
 - [ ] Dashboard com métricas por período e métricas multicurrency
 - [ ] Testes de permissão e sem dados
 

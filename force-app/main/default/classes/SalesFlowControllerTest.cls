@@ -19,8 +19,13 @@ private class SalesFlowControllerTest {
             Name = 'Licenças de software', AccountId = account.Id, StageName = stage,
             CloseDate = Date.today().addDays(21), Amount = 5000
         );
+        List<TaskStatus> openStatuses = [
+            SELECT ApiName FROM TaskStatus WHERE IsClosed = false
+            ORDER BY IsDefault DESC, SortOrder ASC LIMIT 1
+        ];
+        System.assert(!openStatuses.isEmpty(), 'Organização sem status aberto de tarefa');
         insert new Task(Subject = 'Ligar para cliente', ActivityDate = Date.today().addDays(1),
-                        Status = 'Not Started', Priority = 'Normal');
+                        Status = openStatuses[0].ApiName);
     }
 
     @IsTest
@@ -38,9 +43,55 @@ private class SalesFlowControllerTest {
         System.assertEquals(1, opportunities.size());
         Map<String, Object> first = (Map<String, Object>) opportunities[0];
         System.assertEquals('SalesFlow Teste LTDA', first.get('accountName'));
+        List<Object> contacts = (List<Object>) data.get('contacts');
+        System.assertEquals(1, contacts.size(), 'Contato não retornado pelo dashboard');
         System.assertEquals(1, tasks.size());
         System.assertEquals(150, data.get('boardLimit'));
         System.assert(!stages.isEmpty());
+    }
+
+    @IsTest
+    static void searchesOpportunitiesOnServer() {
+        Test.startTest();
+        Map<String, Object> found = (Map<String, Object>) JSON.deserializeUntyped(
+            SalesFlowController.searchOpportunities('Licenças', null, 1));
+        Map<String, Object> missing = (Map<String, Object>) JSON.deserializeUntyped(
+            SalesFlowController.searchOpportunities('Nome que não existe 999', null, 1));
+        Test.stopTest();
+        System.assertEquals(1, found.get('totalCount'));
+        System.assertEquals(1, ((List<Object>)found.get('records')).size());
+        System.assertEquals(0, missing.get('totalCount'));
+        System.assertEquals(0, ((List<Object>)missing.get('records')).size());
+    }
+
+    @IsTest
+    static void searchesWithStageAndCompanyName() {
+        String stage = availableStages()[0];
+        Test.startTest();
+        Map<String, Object> result = (Map<String, Object>) JSON.deserializeUntyped(
+            SalesFlowController.searchOpportunities('SalesFlow Teste', stage, 1));
+        Test.stopTest();
+        System.assertEquals(1, result.get('totalCount'));
+    }
+
+    @IsTest
+    static void rejectsInvalidStageFilter() {
+        try {
+            SalesFlowController.searchOpportunities('', 'STAGE_XXXXX', 1);
+            System.assert(false, 'Filtro inválido deveria falhar');
+        } catch (AuraHandledException expected) {
+            System.assert(true);
+        }
+    }
+
+    @IsTest
+    static void rejectsPageOutsideOffsetLimit() {
+        try {
+            SalesFlowController.searchOpportunities('', null, 102);
+            System.assert(false, 'Limite de OFFSET deveria ser respeitado');
+        } catch (AuraHandledException expected) {
+            System.assert(true);
+        }
     }
 
     @IsTest
@@ -60,6 +111,26 @@ private class SalesFlowControllerTest {
         try {
             SalesFlowController.updateOpportunityStage(record.Id, 'ETAPA_INEXISTENTE');
             System.assert(false, 'Era esperado erro para etapa inválida');
+        } catch (AuraHandledException expected) {
+            System.assert(true);
+        }
+    }
+
+    @IsTest
+    static void completesTaskUsingOrgStatus() {
+        Task taskToClose = [SELECT Id FROM Task WHERE IsClosed = false LIMIT 1];
+        Test.startTest();
+        SalesFlowController.completeTask(taskToClose.Id);
+        Test.stopTest();
+        Task completed = [SELECT IsClosed FROM Task WHERE Id = :taskToClose.Id LIMIT 1];
+        System.assertEquals(true, completed.IsClosed, 'A tarefa deveria estar concluída');
+    }
+
+    @IsTest
+    static void rejectsTaskWithoutId() {
+        try {
+            SalesFlowController.completeTask(null);
+            System.assert(false, 'Era esperado erro para tarefa ausente');
         } catch (AuraHandledException expected) {
             System.assert(true);
         }
