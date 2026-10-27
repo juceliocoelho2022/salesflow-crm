@@ -25,6 +25,11 @@
     ['Licenças e Implantação', 5, 450000, 4, '2026-10-25'], ['Solução de Obras', 10, 230000, 4, '2026-10-28'],
     ['Migração Cloud', 11, 220000, 0, '2026-11-10'], ['Gestão Hospitalar', 12, 180000, 2, '2026-12-03']
   ].map((r,i) => ({ id:i+1, name:r[0], accountId:r[1], amount:r[2], stage:r[3], closeDate:r[4] }));
+  const contactsSeed = [
+    { id:1, name:'Ana Silva', accountId:1, email:'ana@example.com',phone:'(11) 90000-0001' },
+    { id:2, name:'Carlos Souza', accountId:2, email:'carlos@example.com',phone:'(11) 90000-0002' },
+    { id:3, name:'Bruna Costa', accountId:8, email:'bruna@example.com',phone:'(11) 90000-0003' }
+  ];
   const taskSeed = [
     { id:1, name:'Enviar proposta comercial', accountId:3, due:'2026-10-27', completed:false },
     { id:2, name:'Preparar apresentação', accountId:1, due:'2026-10-27', completed:false },
@@ -38,7 +43,8 @@
   let accounts = getSaved('salesflow.demo.accounts.v1', accountsSeed);
   let opps = getSaved('salesflow.demo.opps.v1', oppSeed);
   let tasks = getSaved('salesflow.demo.tasks.v1', taskSeed);
-  let view = 'dashboard'; let search = ''; let modalType = 'opportunity';
+  let contacts = getSaved('salesflow.demo.contacts.v2', contactsSeed);
+  let view = 'dashboard'; let search = ''; let modalType = 'opportunity'; let stageFilter = ''; 
   const $ = (selector) => document.querySelector(selector);
   const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
   const money = (value) => new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}).format(value || 0);
@@ -46,10 +52,11 @@
   const date = (value) => value ? value.split('-').reverse().join('/') : '—';
   const accountName = (id) => accounts.find((a) => Number(a.id) === Number(id))?.name || 'Sem cliente';
   const save = () => {
-    try { localStorage.setItem('salesflow.demo.accounts.v1',JSON.stringify(accounts));localStorage.setItem('salesflow.demo.opps.v1',JSON.stringify(opps));localStorage.setItem('salesflow.demo.tasks.v1',JSON.stringify(tasks)); }
+    try { localStorage.setItem('salesflow.demo.accounts.v1',JSON.stringify(accounts));localStorage.setItem('salesflow.demo.opps.v1',JSON.stringify(opps));localStorage.setItem('salesflow.demo.tasks.v1',JSON.stringify(tasks));localStorage.setItem('salesflow.demo.contacts.v2',JSON.stringify(contacts)); }
     catch { /* Some browsers disallow localStorage for file:// pages. Demo still works in memory. */ }
   };
-  const filteredOpps = () => opps.filter((o) => (`${o.name} ${accountName(o.accountId)} ${stages[o.stage]}`).toLocaleLowerCase('pt-BR').includes(search));
+  const filteredOpps = () => opps.filter((o) => (stageFilter === '' || Number(stageFilter) === o.stage) && (`${o.name} ${accountName(o.accountId)} ${stages[o.stage]}`).toLocaleLowerCase('pt-BR').includes(search));
+  const filteredContacts = () => contacts.filter((c) => `${c.name} ${accountName(c.accountId)} ${c.email || ''} ${c.phone || ''}`.toLocaleLowerCase('pt-BR').includes(search));
   const filteredAccounts = () => accounts.filter((a) => `${a.name} ${a.sector}`.toLocaleLowerCase('pt-BR').includes(search));
   const filteredTasks = () => tasks.filter((t) => `${t.name} ${accountName(t.accountId)}`.toLocaleLowerCase('pt-BR').includes(search));
   const totalFor = (stage) => opps.filter((o)=>o.stage===stage).reduce((sum,o)=>sum+o.amount,0);
@@ -84,39 +91,44 @@
     $('#quickTasks').innerHTML=pending.map(t=>`<div class="task-list-item"><input type="checkbox" data-complete="${t.id}" aria-label="Concluir ${esc(t.name)}"><div class="task-detail"><b>${esc(t.name)}</b><small>${esc(accountName(t.accountId))}</small></div><div class="task-date">${date(t.due)}</div></div>`).join('') || '<p class="empty">Nenhuma tarefa pendente.</p>';
   }
   function renderRecords() {
-    const isAccounts=view==='accounts',isTasks=view==='tasks';
-    $('#recordTitle').textContent=isAccounts?'Clientes cadastrados':isTasks?'Atividades comerciais':view==='reports'?'Relatório detalhado de oportunidades':'Oportunidades recentes';
-    $('#recordSubtitle').textContent=isAccounts?`${filteredAccounts().length} contas no modo demo`:isTasks?`${filteredTasks().length} atividades no modo demo`:`${filteredOpps().length} negócios no modo demo`;
+    const isAccounts=view==='accounts',isContacts=view==='contacts',isTasks=view==='tasks';
+    $('#recordTitle').textContent=isAccounts?'Clientes cadastrados':isContacts?'Contatos dos clientes':isTasks?'Atividades comerciais':view==='reports'?'Relatório detalhado de oportunidades':'Oportunidades recentes';
+    $('#recordSubtitle').textContent=isAccounts?`${filteredAccounts().length} contas no modo demo`:isContacts?`${filteredContacts().length} contatos no modo demo`:isTasks?`${filteredTasks().length} atividades no modo demo`:`${filteredOpps().length} negócios no modo demo`;
     let columns,rows;
     if(isAccounts){columns=['Cliente','Setor','Telefone'];rows=filteredAccounts().map(a=>[a.name,a.sector,a.phone]);}
+    else if(isContacts){columns=['Contato','Cliente','E-mail','Telefone'];rows=filteredContacts().map(c=>[c.name,accountName(c.accountId),c.email,c.phone]);}
     else if(isTasks){columns=['Atividade','Cliente','Prazo','Status'];rows=filteredTasks().map(t=>[t.name,accountName(t.accountId),date(t.due),t.completed?'Concluída':'Pendente']);}
     else {columns=['Oportunidade','Cliente','Valor','Etapa','Fechamento'];rows=filteredOpps().map(o=>[o.name,accountName(o.accountId),money(o.amount),stages[o.stage],date(o.closeDate)]);}
     $('#recordsTable thead').innerHTML=`<tr>${columns.map(c=>`<th>${esc(c)}</th>`).join('')}</tr>`;
-    $('#recordsTable tbody').innerHTML=rows.map(r=>`<tr>${r.map((c,i)=>`<td>${i===3&&!isTasks&&!isAccounts?`<span class="table-pill">${esc(c)}</span>`:esc(c)}</td>`).join('')}</tr>`).join('') || `<tr><td colspan="${columns.length}" class="empty">Sem resultados para a pesquisa.</td></tr>`;
+    $('#recordsTable tbody').innerHTML=rows.map(r=>`<tr>${r.map((c,i)=>`<td>${i===3&&!isTasks&&!isAccounts&&!isContacts?`<span class="table-pill">${esc(c)}</span>`:esc(c)}</td>`).join('')}</tr>`).join('') || `<tr><td colspan="${columns.length}" class="empty">Sem resultados para a pesquisa.</td></tr>`;
     return {columns,rows};
   }
   function render() {
     renderStats();renderBoard();renderBars();renderDonut();renderQuickTasks();renderRecords();
-    const titles={dashboard:['Visão Geral','Tudo que importa para acelerar suas vendas.'],accounts:['Clientes','Gerencie empresas e relacionamentos comerciais.'],opportunities:['Oportunidades','Acompanhe a jornada do negócio.'],tasks:['Tarefas','Priorize suas ações comerciais.'],reports:['Relatórios','Visão detalhada das oportunidades e resultados.']};
+    const titles={contacts:['Contatos','Acompanhe os profissionais de cada cliente.'],dashboard:['Visão Geral','Tudo que importa para acelerar suas vendas.'],accounts:['Clientes','Gerencie empresas e relacionamentos comerciais.'],opportunities:['Oportunidades','Acompanhe a jornada do negócio.'],tasks:['Tarefas','Priorize suas ações comerciais.'],reports:['Relatórios','Visão detalhada das oportunidades e resultados.']};
     $('#pageTitle').textContent=titles[view][0];$('#pageDescription').textContent=titles[view][1];$('#breadcrumb').textContent=titles[view][0].toUpperCase();
     $('#menu').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+    $('#stageFilterWrap').hidden = view !== 'opportunities';
     const home=view==='dashboard';$('#stats').hidden=!home;$('#boardPanel').hidden=!home;$('#bottom').hidden=!home;
   }
   function openCreate(type) {
-    modalType=type;$('#modalTitle').textContent=type==='account'?'Novo cliente':'Nova oportunidade';
-    $('#formFields').innerHTML=type==='account'?`<div class="form-body"><label>Nome da empresa<input name="name" maxlength="120" required placeholder="Ex.: Exemplo Tecnologia"></label><label>Setor<input name="sector" maxlength="80" placeholder="Ex.: Tecnologia"></label><label>Telefone<input name="phone" maxlength="35" placeholder="Ex.: (11) 3333-3333"></label></div>`:`<div class="form-body"><label>Oportunidade<input name="name" maxlength="120" required placeholder="Ex.: Contrato de consultoria"></label><label>Cliente<select name="accountId" required>${accounts.map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join('')}</select></label><label>Valor (R$)<input type="number" name="amount" min="0" step="0.01" required></label><label>Etapa<select name="stage">${stages.map((s,i)=>`<option value="${i}">${esc(s)}</option>`).join('')}</select></label><label>Previsão de fechamento<input type="date" name="closeDate" required value="2026-11-30"></label></div>`;
+    modalType=type;$('#modalTitle').textContent=type==='account'?'Novo cliente':type==='contact'?'Novo contato':'Nova oportunidade';
+    $('#formFields').innerHTML=type==='contact'?`<div class="form-body"><label>Nome completo<input name="name" maxlength="120" required placeholder="Ex.: Ana Silva"></label><label>Cliente<select name="accountId" required>${accounts.map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join('')}</select></label><label>E-mail<input name="email" type="email" maxlength="200"></label><label>Telefone<input name="phone" maxlength="35"></label></div>`:type==='account'? `<div class="form-body"><label>Nome da empresa<input name="name" maxlength="120" required placeholder="Ex.: Exemplo Tecnologia"></label><label>Setor<input name="sector" maxlength="80" placeholder="Ex.: Tecnologia"></label><label>Telefone<input name="phone" maxlength="35" placeholder="Ex.: (11) 3333-3333"></label></div>`:`<div class="form-body"><label>Oportunidade<input name="name" maxlength="120" required placeholder="Ex.: Contrato de consultoria"></label><label>Cliente<select name="accountId" required>${accounts.map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join('')}</select></label><label>Valor (R$)<input type="number" name="amount" min="0" step="0.01" required></label><label>Etapa<select name="stage">${stages.map((s,i)=>`<option value="${i}">${esc(s)}</option>`).join('')}</select></label><label>Previsão de fechamento<input type="date" name="closeDate" required value="2026-11-30"></label></div>`;
     $('#createModal').showModal();$('#formFields input')?.focus();
   }
   $('#menu').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(b){view=b.dataset.view;render();}});
   $('#search').addEventListener('input',e=>{search=e.target.value.trim().toLocaleLowerCase('pt-BR');render();});
   $('#newAccount').addEventListener('click',()=>openCreate('account'));
+  $('#newContact').addEventListener('click',()=>openCreate('contact'));
+  $('#stageFilter').innerHTML='<option value="">Todas as etapas</option>'+stages.map((name,i)=>`<option value="${i}">${esc(name)}</option>`).join('');
+  $('#stageFilter').addEventListener('change',e=>{stageFilter=e.target.value;render();});
   $('#newOpportunity').addEventListener('click',()=>openCreate('opportunity'));
   $('#closeModal').addEventListener('click',()=>$('#createModal').close());
   $('#cancelModal').addEventListener('click',()=>$('#createModal').close());
   $('#seeTasks').addEventListener('click',()=>{view='tasks';render();});
   $('#board').addEventListener('change',e=>{if(e.target.matches('[data-stage-for]')){const o=opps.find(x=>x.id===Number(e.target.dataset.stageFor));if(o){o.stage=Number(e.target.value);save();render();toast('Etapa alterada na demonstração local.');}}});
   $('#quickTasks').addEventListener('change',e=>{if(e.target.matches('[data-complete]')){const t=tasks.find(x=>x.id===Number(e.target.dataset.complete));if(t){t.completed=e.target.checked;save();render();toast('Atividade concluída no modo demo.');}}});
-  $('#createForm').addEventListener('submit',e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.currentTarget).entries());if(modalType==='account'){accounts.unshift({id:Math.max(0,...accounts.map(a=>a.id))+1,name:v.name.trim(),sector:v.sector.trim(),phone:v.phone.trim()});}else{opps.unshift({id:Math.max(0,...opps.map(o=>o.id))+1,name:v.name.trim(),accountId:Number(v.accountId),amount:Number(v.amount),stage:Number(v.stage),closeDate:v.closeDate});}save();$('#createModal').close();render();toast('Registro criado na demonstração local.');});
+  $('#createForm').addEventListener('submit',e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.currentTarget).entries());if(modalType==='account'){accounts.unshift({id:Math.max(0,...accounts.map(a=>a.id))+1,name:v.name.trim(),sector:v.sector.trim(),phone:v.phone.trim()});}else if(modalType==='contact'){contacts.unshift({id:Math.max(0,...contacts.map(c=>c.id))+1,name:v.name.trim(),accountId:Number(v.accountId),email:v.email.trim(),phone:v.phone.trim()});}else{opps.unshift({id:Math.max(0,...opps.map(o=>o.id))+1,name:v.name.trim(),accountId:Number(v.accountId),amount:Number(v.amount),stage:Number(v.stage),closeDate:v.closeDate});}save();$('#createModal').close();render();toast('Registro criado na demonstração local.');});
   $('#exportCsv').addEventListener('click',()=>{const {columns,rows}=renderRecords();const csv='\ufeff'+[columns,...rows].map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));const a=document.createElement('a');a.href=url;a.download='salesflow-demo-'+view+'.csv';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);toast('CSV gerado a partir dos dados fictícios.');});
   render();
 })();

@@ -8,7 +8,7 @@
 
 Aplicação de CRM comercial com dashboard, funil de vendas, clientes e tarefas, criada para demonstrar desenvolvimento **nativo no Salesforce**. O projeto usa objetos padrão da plataforma e pode ser implantado em uma **Developer Edition** sem contratação de licença adicional para estudos.
 
-> **Status: MVP v0.1.0 — código-fonte e prévia local disponíveis.** Ainda **não foi implantado nem testado dentro de uma organização Salesforce**; a validação local de estrutura não substitui o deploy ou os testes Apex. A prévia é uma aplicação local de demonstração com dados fictícios, não está conectada ao Salesforce.
+> **Status: MVP v0.2.0 — código-fonte e prévia local disponíveis.** Ainda **não foi implantado nem testado dentro de uma organização Salesforce**; a validação local de estrutura não substitui o deploy ou os testes Apex. A prévia é uma aplicação local de demonstração com dados fictícios, não está conectada ao Salesforce.
 
 ![Conceito visual SalesFlow CRM](docs/conceito-visual.png)
 
@@ -19,20 +19,21 @@ Aplicação de CRM comercial com dashboard, funil de vendas, clientes e tarefas,
 - [Demonstração para recrutadores](docs/DEMO_RECRUTADORES.md) · [Roadmap](docs/ROADMAP.md)
 - [Como contribuir](CONTRIBUTING.md) · [Segurança](SECURITY.md) · [Histórico de alterações](CHANGELOG.md)
 
-## Entregas da v0.1.0
+## Entregas da v0.2.0
 
 | Módulo | Implementação Salesforce | Prévia local |
 |---|---|---|
 | Dashboard comercial | Contagem de contas, contatos, oportunidades; valor aberto e ganho | Sim, com dados simulados |
 | Funil por etapa | Colunas dinâmicas conforme etapas disponíveis na organização | 5 etapas de demonstração |
-| Oportunidades | Exibir, criar via `lightning-record-edit-form`, alterar etapa e abrir registro | Criar, buscar, alterar etapas |
+| Oportunidades | Criar via `lightning-record-edit-form`, alterar etapa, pesquisar/filtar e paginar no Salesforce (SOQL com LIMIT 20/OFFSET e USER_MODE) | Criar, buscar, filtrar por etapa e alterar etapa |
 | Clientes | Exibir, buscar, abrir e criar com ação padrão do Salesforce | Criar, listar e buscar |
-| Tarefas | Listar tarefas pendentes e abrir/criar com ações padrão | Marcar concluída localmente |
+| Contatos | Lista de até 30 contatos recentes, busca local e abertura/cadastro pelo padrão Salesforce | Listar, buscar e criar contatos fictícios |
+| Tarefas | Listar pendências, abrir/criar e concluir com Apex no modo usuário | Marcar concluída localmente |
 | Relatórios | Resumo dos valores e quantidade por etapa | Gráficos + exportação CSV |
 | Segurança | `with sharing`, `WITH USER_MODE` e `update as user` | Nenhuma autenticação (apenas demo) |
-| Testes | Classe Apex com casos de leitura e atualização | `node --check` + verificador estrutural |
+| Testes | Classe Apex com casos de leitura, atualização de etapa e conclusão de tarefa | `node --check` + verificador estrutural |
 
-**Escopo explícito:** a v0.1.0 não inclui login próprio, multi-tenant SaaS, gateway de pagamento, integração com Java/Spring Boot, disparo de e-mails, relatórios mensais, integração Kafka ou deploy automatizado em produção. Esses são caminhos de evolução, não funcionalidades já entregues.
+**Escopo explícito:** a v0.2.0 não inclui login próprio, multi-tenant SaaS, gateway de pagamento, integração com Java/Spring Boot, disparo de e-mails, relatórios mensais, integração Kafka ou deploy automatizado em produção. Esses são caminhos de evolução, não funcionalidades já entregues.
 
 ## 1. Prévia rápida (Windows, sem instalar nada)
 
@@ -50,7 +51,7 @@ Os registros são **100% fictícios**, salvos apenas no `localStorage` do navega
 - Git (e conta no GitHub para publicação).
 - Acesso de administrador à organização de estudo ou permissões equivalentes para metadados/objetos.
 
-> O componente consulta `Account`, `Contact`, `Opportunity` e `Task`. O usuário precisa das permissões de leitura nos campos usados, criação de oportunidades para o formulário e atualização de oportunidade para mudar o estágio. A classe Apex tem Permission Set que libera sua execução. Uma Developer Edition normalmente é suficiente para o estudo, mas as permissões e os estágios dependem da configuração da organização.
+> O componente consulta `Account`, `Contact`, `Opportunity` e `Task`. O usuário precisa das permissões de leitura nos campos usados, criação de oportunidades para o formulário, atualização de oportunidade para mudar o estágio e atualização de Task.Status para concluir tarefas. A classe Apex tem Permission Set que libera sua execução. Uma Developer Edition normalmente é suficiente para o estudo, mas as permissões e os estágios dependem da configuração da organização.
 
 ### Passo a passo via PowerShell
 
@@ -138,9 +139,9 @@ Não existe banco externo nesta versão: os dados residem no Salesforce. Em vers
 
 - A classe `SalesFlowController` usa `with sharing` e todas as operações de leitura/escrita estão em **modo usuário**, aplicando permissões de registros, objetos e campos.
 - Mudanças de estágio validam o valor contra as opções ativas no `Opportunity.StageName`; regras e restrições adicionais do Salesforce continuam sendo aplicadas pela plataforma.
-- Os KPIs usam contagens e somas independentes dos limites de listagem. O kanban carrega **até 150 oportunidades recentes**, contas até 30 e tarefas até 30, por decisão de desempenho da primeira versão. **Isso não é paginação**; se houver mais dados, eles não aparecerão no board.
+- Os KPIs usam contagens e somas independentes dos limites de listagem. O kanban carrega **até 150 oportunidades recentes**, contas e contatos até 30 cada e tarefas até 30. A tela de oportunidades tem **paginação diretamente no servidor Salesforce** na tela de oportunidades (20 por página e busca pelo nome da oportunidade ou conta), limitada pelo teto de `OFFSET 2000` (101 páginas). A tela de funil mantém a amostra das 150 oportunidades mais recentes; outras listagens são amostras locais.
 - Os números monetários assumem **BRL** no componente e na prévia. Organizações com multicurrency exigem adaptação dos KPIs para evitar somar moedas sem conversão.
-- O relatório de etapas considera todos os registros visíveis ao usuário, mas a pesquisa do componente filtra apenas os registros carregados na UI; por isso, pesquisar não altera os valores globais dos cards por etapa.
+- O relatório de etapas considera todos os registros visíveis ao usuário. A busca na tela **Oportunidades** consulta diretamente a org. O dashboard/kanban mantém seus KPIs globais e 150 cartões mais recentes, portanto o filtro de pesquisa não altera os valores globais do relatório.
 - O usuário final deve receber a permissão necessária para executar a classe Apex. `SalesFlow_User` concede apenas **acesso à classe** e **não modifica** as permissões padrão dos objetos/fields.
 - A aplicação **não implementa uma autenticação paralela**; usa o gerenciamento de sessão e o modelo de acesso nativos do Salesforce.
 - Na prévia, `localStorage` serve somente para persistência de dados falsos do navegador. Nunca inserir dados reais/sensíveis na demonstração.
@@ -169,7 +170,7 @@ O ZIP vem sem `.git` nem credenciais. Confira o [guia de publicação](docs/GITH
 cd C:\Projetos\salesflow-crm
 git init -b main
 git add .
-git commit -m "feat: bootstrap SalesFlow CRM MVP v0.1.0"
+git commit -m "feat: release SalesFlow CRM v0.2.0"
 git remote add origin https://github.com/SEU_USUARIO/salesflow-crm.git
 git push -u origin main
 ```
@@ -190,15 +191,15 @@ O script cria o repositório público `salesflow-crm` (ou usa um repositório ex
 main                         releases estáveis
   └── develop                integração
        ├── feature/contacts
-       ├── feature/opportunity-pagination
+       ├── feature/v0.2.0-search-opportunities
        └── feature/java-salesforce-integration
 ```
 
 Ao concluir e validar no Salesforce:
 
 ```powershell
-git tag -a v0.1.0 -m "SalesFlow CRM MVP v0.1.0"
-git push origin v0.1.0
+git tag -a v0.2.0 -m "SalesFlow CRM v0.2.0"
+git push origin v0.2.0
 ```
 
 ## 6. Critérios para demonstrar a recrutadores
@@ -208,7 +209,7 @@ git push origin v0.1.0
 3. Mudar a etapa e mostrar que o dado permaneceu salvo no Salesforce.
 4. Abrir `SalesFlowController.cls` e explicar `with sharing`, `WITH USER_MODE` e DML em modo usuário.
 5. Executar a classe de teste Apex na organização e mostrar os resultados.
-6. Explicar limites atuais e roadmap de escalabilidade, incluindo paginação e integração Java.
+6. Explicar a paginação de oportunidades no servidor (e limite de OFFSET), o dashboard com amostra de 150 registros e o roadmap de integração Java.
 
 Esse roteiro comprova habilidades de CRM, Apex, SOQL, LWC, CRUD/FLS, Git e documentação técnica — sem declarar funcionalidades que não existem.
 
