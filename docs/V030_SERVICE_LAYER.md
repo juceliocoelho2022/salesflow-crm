@@ -26,7 +26,7 @@ A introdução de **Selector** e separação das consultas do Controller fica pa
 
 - v0.2.0 implantada com sucesso: deploy `0Afbm00000lOgRFCA0` (10/10 testes Apex).
 - Dark Mode LWC implantado com sucesso: deploy `0Afbm00000lYBIvCAO` (10/10 testes Apex).
-- Esta refatoração de serviço **ainda exige dry-run e testes Apex na org após o pull**.
+- Service Layer validada por dry-run (`0Afbm00000lXzUgCAK`) e implantada na Developer Edition (`0Afbm00000lXxO2CAK`), com 12/12 testes Apex aprovados em ambas as execuções.
 
 ## Cobertura Apex — correção de regressão
 
@@ -37,7 +37,7 @@ A classe de testes agora contém **dois casos adicionais** para exercer o tratam
 - `rejectsCompletionOfDeletedTask`: serviço de tarefas deve traduzir falha DML para erro controlado.
 - `rejectsStageChangeOfDeletedOpportunity`: serviço de oportunidades deve traduzir falha DML para erro controlado.
 
-**Esperado:** 12 métodos de teste aprovados e cobertura de ambas as classes acima de 75%. Os resultados ainda precisam ser comprovados no próximo `dry-run`; não afirmar aprovação até o Salesforce retornar `Succeeded`.
+**Confirmado em 28/10/2026:** dry-run e deploy real finalizaram com `Status: Succeeded` e 12/12 testes aprovados. A cobertura exata por classe não aparece nos logs compartilhados; não atribuir percentuais não verificados.
 
 ## Atualizar no IntelliJ (sem ZIP)
 
@@ -50,7 +50,7 @@ python scripts/validate.py
 sf project deploy start --dry-run --source-dir force-app --target-org salesflow-dev --test-level RunSpecifiedTests --tests SalesFlowControllerTest --wait 20
 ```
 
-Somente se `Status: Succeeded`, 12 testes aprovados e cobertura mínima atendida, implantar **no ambiente de desenvolvimento**:
+Para futuras reimplantações, após `Status: Succeeded` e 12 testes aprovados, implantar **no ambiente de desenvolvimento**:
 
 ```powershell
 sf project deploy start --source-dir force-app --target-org salesflow-dev --test-level RunSpecifiedTests --tests SalesFlowControllerTest --wait 20
@@ -66,4 +66,4 @@ Validar pela interface: consulta da oportunidade TechCorp, mudança de etapa vá
 4. Evoluir automações de tarefas e indicadores.
 5. Implementar integração Java / Spring Boot em versão futura.
 
-**Status:** alterações registradas em branch para revisão. GitHub Actions estático não substitui compilação Apex na organização Salesforce.
+**Status em 28/10/2026:** mudanças implantadas com sucesso na Developer Edition, 12/12 testes Apex aprovados; testes funcionais da interface ainda pendentes. PR permanece aberto para revisão.
