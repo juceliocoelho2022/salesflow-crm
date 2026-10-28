@@ -206,49 +206,21 @@ public with sharing class SalesFlowController {
         public OpportunitySearchData() { records = new List<OpportunityData>(); }
     }
 
+    /**
+     * @description Lightning boundary: opportunity mutations are delegated to the service layer.
+     * The public Aura contract is preserved for existing LWC integrations.
+     */
     @AuraEnabled
     public static void updateOpportunityStage(Id opportunityId, String newStage) {
-        if (opportunityId == null || String.isBlank(newStage)) {
-            throw new AuraHandledException('Oportunidade e etapa são obrigatórias.');
-        }
-        Boolean allowed = false;
-        for (Schema.PicklistEntry entry : Opportunity.StageName.getDescribe().getPicklistValues()) {
-            if (entry.isActive() && entry.getValue() == newStage) {
-                allowed = true;
-                break;
-            }
-        }
-        if (!allowed) throw new AuraHandledException('Etapa inválida ou indisponível.');
-        Opportunity record = new Opportunity(Id = opportunityId, StageName = newStage);
-        try {
-            update as user record;
-        } catch (DmlException error) {
-            throw new AuraHandledException('Não foi possível alterar a etapa. Verifique suas permissões e as regras da oportunidade.');
-        }
+        SalesFlowOpportunityService.updateStage(opportunityId, newStage);
     }
 
     /**
-     * @description Conclui uma tarefa visível usando o status fechado da organização.
-     * O status não é fixado em inglês porque pode ser personalizado.
-     * A gravação respeita CRUD/FLS/compartilhamento com DML no modo usuário.
+     * @description Lightning boundary: task mutations are delegated to the service layer.
      */
     @AuraEnabled
     public static void completeTask(Id taskId) {
-        if (taskId == null) {
-            throw new AuraHandledException('A tarefa é obrigatória.');
-        }
-        List<TaskStatus> closedStatuses = [
-            SELECT ApiName FROM TaskStatus
-            WHERE IsClosed = true ORDER BY SortOrder ASC LIMIT 1
-        ];
-        if (closedStatuses.isEmpty()) {
-            throw new AuraHandledException('Nenhum status de tarefa concluída está configurado.');
-        }
-        try {
-            update as user new Task(Id = taskId, Status = closedStatuses[0].ApiName);
-        } catch (DmlException error) {
-            throw new AuraHandledException('Não foi possível concluir a tarefa. Verifique suas permissões e regras da organização.');
-        }
+        SalesFlowTaskService.complete(taskId);
     }
 
     public class DashboardData {
