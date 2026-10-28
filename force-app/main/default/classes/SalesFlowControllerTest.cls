@@ -136,6 +136,46 @@ private class SalesFlowControllerTest {
         }
     }
 
+    /**
+     * The service must translate a USER_MODE DML failure into a controlled
+     * Lightning error. A deleted test record reliably exercises that branch
+     * without changing real organization data.
+     */
+    @IsTest
+    static void rejectsCompletionOfDeletedTask() {
+        Task record = [SELECT Id FROM Task LIMIT 1];
+        delete record;
+        Boolean rejected = false;
+
+        Test.startTest();
+        try {
+            SalesFlowController.completeTask(record.Id);
+        } catch (AuraHandledException expected) {
+            rejected = true;
+        }
+        Test.stopTest();
+
+        System.assert(rejected, 'Concluir tarefa excluída deve retornar erro controlado');
+    }
+
+    @IsTest
+    static void rejectsStageChangeOfDeletedOpportunity() {
+        Opportunity record = [SELECT Id FROM Opportunity LIMIT 1];
+        delete record;
+        String validStage = availableStages()[0];
+        Boolean rejected = false;
+
+        Test.startTest();
+        try {
+            SalesFlowController.updateOpportunityStage(record.Id, validStage);
+        } catch (AuraHandledException expected) {
+            rejected = true;
+        }
+        Test.stopTest();
+
+        System.assert(rejected, 'Alterar oportunidade excluída deve retornar erro controlado');
+    }
+
     @IsTest
     static void blocksBlankStage() {
         try {

@@ -1,6 +1,6 @@
 # SalesFlow CRM
 
-![CI](https://github.com/juceliocoelho2022/salesflow-crm/actions/workflows/validate.yml/badge.svg) ![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg) ![Status](https://img.shields.io/badge/status-MVP%20em%20valida%C3%A7%C3%A3o-orange.svg)
+![CI](https://github.com/juceliocoelho2022/salesflow-crm/actions/workflows/validate.yml/badge.svg) ![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg) ![Status](https://img.shields.io/badge/status-Salesforce%20deploy%20validado-success.svg)
 
 > **Repositório de portfólio** · Desenvolvimento Salesforce com Apex, LWC e SOQL · Documentação em português.
 
@@ -8,13 +8,13 @@
 
 Aplicação de CRM comercial com dashboard, funil de vendas, clientes e tarefas, criada para demonstrar desenvolvimento **nativo no Salesforce**. O projeto usa objetos padrão da plataforma e pode ser implantado em uma **Developer Edition** sem contratação de licença adicional para estudos.
 
-> **Status: MVP v0.2.0 — código-fonte e prévia local disponíveis.** Ainda **não foi implantado nem testado dentro de uma organização Salesforce**; a validação local de estrutura não substitui o deploy ou os testes Apex. A prévia é uma aplicação local de demonstração com dados fictícios, não está conectada ao Salesforce.
+> **Status: v0.2.0 implantada e testada em Salesforce Developer Edition** (deploy `0Afbm00000lOgRFCA0`, 10/10 testes Apex). **Dark Mode v0.3.0** implantado (deploy `0Afbm00000lYBIvCAO`, 10/10 testes Apex) e apresentado na interface Salesforce; a prévia local também utiliza tema Dark. **Service Layer v0.3.0 validada e implantada em Developer Edition** (dry-run `0Afbm00000lXzUgCAK`, deploy real `0Afbm00000lXxO2CAK`, ambos com 12/12 testes Apex aprovados). O PR #3 permanece em revisão até a homologação funcional da interface. A prévia utiliza somente dados fictícios e não se conecta ao Salesforce.
 
 ![Conceito visual SalesFlow CRM](docs/conceito-visual.png)
 
 ## Navegação do repositório
 
-- [Arquitetura e trade-offs](docs/ARQUITETURA.md) · [ADR-0001](docs/adr/0001-objetos-nativos-salesforce.md)
+- [Arquitetura e trade-offs](docs/ARQUITETURA.md) · [Service Layer v0.3.0](docs/V030_SERVICE_LAYER.md) · [ADR-0001](docs/adr/0001-objetos-nativos-salesforce.md)
 - [Operação e deploy Salesforce](docs/OPERACAO_SALESFORCE.md) · [Publicação GitHub](docs/GITHUB_PUBLICACAO.md)
 - [Demonstração para recrutadores](docs/DEMO_RECRUTADORES.md) · [Roadmap](docs/ROADMAP.md)
 - [Como contribuir](CONTRIBUTING.md) · [Segurança](SECURITY.md) · [Histórico de alterações](CHANGELOG.md)
@@ -37,9 +37,9 @@ Aplicação de CRM comercial com dashboard, funil de vendas, clientes e tarefas,
 
 ## 1. Prévia rápida (Windows, sem instalar nada)
 
-1. Descompacte o ZIP.
-2. Abra o arquivo `preview/index.html` no Chrome, Edge ou outro navegador moderno.
-3. Teste menu, busca, criação de cliente e oportunidade, mudança de etapa, marcação de tarefa e exportação CSV.
+1. Clone o repositório com Git (ou atualize com `git pull` se já estiver no IntelliJ).
+2. Abra `preview/index.html` no Chrome, Edge ou outro navegador moderno.
+3. Teste o modo Dark/Light, menu, busca, criação de cliente e oportunidade, mudança de etapa, tarefas e exportação CSV.
 
 Os registros são **100% fictícios**, salvos apenas no `localStorage` do navegador. Não existe backend conectado nessa visualização. Para redefinir a prévia, limpe os dados do site no navegador ou as chaves que começam em `salesflow.demo`.
 
