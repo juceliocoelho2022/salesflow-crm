@@ -27,3 +27,51 @@
 .stage-filter { min-width: 185px; max-width: 260px; }
 .pagination { display:flex; justify-content:flex-end; align-items:center; gap:14px; margin-top:17px; color:#63758f; font-size:12px; }
 @media(max-width:740px) { .stage-filter { min-width:155px; width:100%; } .pagination { justify-content:center; } }
+
+
+/* SalesFlow v0.3.0 dark mode. Scoped to our LWC, independent of org theme. */
+.theme-toggle { display:inline-flex; align-items:center; justify-content:center; gap:7px; white-space:nowrap; cursor:pointer; border:1px solid #cad7e6; border-radius:18px; background:#eff5ff; color:#19345a; padding:8px 12px; font-size:12px; font-weight:700; }
+.theme-toggle:hover,.theme-toggle:focus-visible { background:#dceaff; outline:2px solid transparent; box-shadow:0 0 0 2px #4b9eff; }
+
+.salesflow.theme-dark { color:#e9effa; background:#0b1220; border-color:#2a3a51; --navy:#e9effa; --muted:#a4b4cb; color-scheme:dark; }
+.salesflow.theme-dark .topbar { background:#121e31; border-bottom-color:#2d3a50; }
+.salesflow.theme-dark .sidebar { background:#101b2d; border-right-color:#283950; border-bottom-color:#283950; }
+.salesflow.theme-dark .search { background:#17253c; border-color:#344762; }
+.salesflow.theme-dark .search input { color:#f0f6ff; }
+.salesflow.theme-dark .search input::placeholder { color:#9eafc6; }
+.salesflow.theme-dark .identity strong span { color:#70b6ff; }
+.salesflow.theme-dark .identity small,.salesflow.theme-dark .nav-label,.salesflow.theme-dark .side-caption { color:#9badc3; }
+.salesflow.theme-dark .nav-btn { color:#cfddf1; }
+.salesflow.theme-dark .nav-btn:hover,.salesflow.theme-dark .nav-btn:focus-visible { color:#a5d1ff; background:#203656; }
+.salesflow.theme-dark .page-heading .eyebrow { color:#78bdff; }
+.salesflow.theme-dark .kpi,.salesflow.theme-dark .panel { background:#162339; border-color:#30415a; box-shadow:0 4px 18px #03091335; }
+.salesflow.theme-dark .kpi p,.salesflow.theme-dark .kpi small { color:#b0bfd4; }
+.salesflow.theme-dark .kpi strong,.salesflow.theme-dark .section-heading h2 { color:#f1f6ff; }
+.salesflow.theme-dark .helper-chip { background:#1d304a; border-color:#344e6d; color:#c7d9ee; }
+.salesflow.theme-dark .stage-col { background:#101b2d; }
+.salesflow.theme-dark .stage-title { background:#1e3c5d; color:#edf5ff; }
+.salesflow.theme-dark .stage-title small { color:#c3d9ef; }
+.salesflow.theme-dark .stage-title span { background:#253f5d; }
+.salesflow.theme-dark .shade-1 .stage-title { background:#33315b; }
+.salesflow.theme-dark .shade-2 .stage-title { background:#3c2c55; }
+.salesflow.theme-dark .shade-3 .stage-title { background:#542f42; }
+.salesflow.theme-dark .shade-4 .stage-title { background:#1b493f; }
+.salesflow.theme-dark .opp-card { background:#1a2a42; border-color:#334963; box-shadow:none; }
+.salesflow.theme-dark .item-link,.salesflow.theme-dark .subtle-link { color:#83bdff; }
+.salesflow.theme-dark .opp-card-footer { color:#aec0d7; }
+.salesflow.theme-dark .task-item,.salesflow.theme-dark .data-table td { border-bottom-color:#2c3c54; }
+.salesflow.theme-dark .data-table th { background:#20314a; color:#c7d8ec; }
+.salesflow.theme-dark .status-pill { background:#203e60; color:#a7d2ff; }
+.salesflow.theme-dark .empty,.salesflow.theme-dark .pagination { color:#afc0d7; }
+.salesflow.theme-dark .bar-track { background:#253c56; }
+.salesflow.theme-dark .live-pill { color:#a8e2c8; }
+.salesflow.theme-dark .dialog { background:#162339; color:#eef4ff; border:1px solid #334762; }
+.salesflow.theme-dark .dialog-header,.salesflow.theme-dark .dialog-footer { border-color:#334762; }
+.salesflow.theme-dark .error { background:#3d2029; color:#ffd4da; border-color:#824352; }
+.salesflow.theme-dark .theme-toggle { background:#243753; border-color:#3c5472; color:#e5efff; }
+.salesflow.theme-dark .theme-toggle:hover,.salesflow.theme-dark .theme-toggle:focus-visible { background:#315072; }
+.salesflow.theme-dark .blue { background:#153e69; color:#9fd0ff; }
+.salesflow.theme-dark .amber { background:#513e1c; color:#ffcf81; }
+.salesflow.theme-dark .green { background:#153e32; color:#87edc3; }
+.salesflow.theme-dark .purple { background:#3b2d54; color:#dac1ff; }
+@media(max-width:740px) { .theme-toggle { padding:7px 9px; font-size:11px; } }

@@ -1,9 +1,9 @@
 <template>
-    <div class="salesflow">
+    <div class={themeClass}>
         <header class="topbar">
             <div class="identity"><div class="logo">SF</div><div><strong>SalesFlow <span>CRM</span></strong><small>Salesforce Native App</small></div></div>
             <div class="search"><lightning-icon icon-name="utility:search" size="x-small"></lightning-icon><input type="search" placeholder="Pesquisar clientes e oportunidades..." aria-label="Pesquisar clientes e oportunidades" value={query} oninput={handleSearch}></div>
-            <div class="header-actions"><lightning-button-icon icon-name="utility:refresh" alternative-text="Atualizar dados" onclick={handleRefresh}></lightning-button-icon><span class="live-pill"><span class="live-dot"></span> Dados reais da organização</span></div>
+            <div class="header-actions"><button type="button" class="theme-toggle" aria-label={themeToggleLabel} aria-pressed={isDark} onclick={handleThemeToggle} title={themeToggleLabel}><span aria-hidden="true">{themeIcon}</span> {themeToggleLabel}</button><lightning-button-icon icon-name="utility:refresh" alternative-text="Atualizar dados" onclick={handleRefresh}></lightning-button-icon><span class="live-pill"><span class="live-dot"></span> Dados reais da organização</span></div>
         </header>
         <div class="body-layout">
             <aside class="sidebar" aria-label="Menu SalesFlow">

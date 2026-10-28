@@ -130,5 +130,24 @@
   $('#quickTasks').addEventListener('change',e=>{if(e.target.matches('[data-complete]')){const t=tasks.find(x=>x.id===Number(e.target.dataset.complete));if(t){t.completed=e.target.checked;save();render();toast('Atividade concluída no modo demo.');}}});
   $('#createForm').addEventListener('submit',e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.currentTarget).entries());if(modalType==='account'){accounts.unshift({id:Math.max(0,...accounts.map(a=>a.id))+1,name:v.name.trim(),sector:v.sector.trim(),phone:v.phone.trim()});}else if(modalType==='contact'){contacts.unshift({id:Math.max(0,...contacts.map(c=>c.id))+1,name:v.name.trim(),accountId:Number(v.accountId),email:v.email.trim(),phone:v.phone.trim()});}else{opps.unshift({id:Math.max(0,...opps.map(o=>o.id))+1,name:v.name.trim(),accountId:Number(v.accountId),amount:Number(v.amount),stage:Number(v.stage),closeDate:v.closeDate});}save();$('#createModal').close();render();toast('Registro criado na demonstração local.');});
   $('#exportCsv').addEventListener('click',()=>{const {columns,rows}=renderRecords();const csv='\ufeff'+[columns,...rows].map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));const a=document.createElement('a');a.href=url;a.download='salesflow-demo-'+view+'.csv';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);toast('CSV gerado a partir dos dados fictícios.');});
+  // Tema isolado da demonstração. Nunca altera registros ou credenciais Salesforce.
+  const themeButton = $('#themeToggle');
+  const applyTheme = (dark) => {
+    document.body.classList.toggle('theme-dark', dark);
+    themeButton.textContent = dark ? '☀ Modo claro' : '☾ Modo escuro';
+    themeButton.setAttribute('aria-label', dark ? 'Modo claro' : 'Modo escuro');
+    themeButton.setAttribute('aria-pressed', String(dark));
+  };
+  let dark = true;
+  try { dark = localStorage.getItem('salesflow.demo.theme') !== 'light'; }
+  catch { /* Sem armazenamento: permanece escuro nesta sessão. */ }
+  applyTheme(dark);
+  themeButton.addEventListener('click', () => {
+    dark = !dark;
+    applyTheme(dark);
+    try { localStorage.setItem('salesflow.demo.theme', dark ? 'dark' : 'light'); }
+    catch { /* Alternância continua funcional, ainda que temporária. */ }
+  });
+
   render();
 })();
