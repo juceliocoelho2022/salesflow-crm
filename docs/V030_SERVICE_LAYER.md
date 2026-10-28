@@ -28,6 +28,17 @@ A introdução de **Selector** e separação das consultas do Controller fica pa
 - Dark Mode LWC implantado com sucesso: deploy `0Afbm00000lYBIvCAO` (10/10 testes Apex).
 - Esta refatoração de serviço **ainda exige dry-run e testes Apex na org após o pull**.
 
+## Cobertura Apex — correção de regressão
+
+Na validação inicial da refatoração (deploy `0Afbm00000lXzw6CAC`) os **10 testes passaram**, mas a implantação simulada falhou porque `SalesFlowTaskService` alcançou somente **63,636%** de cobertura, abaixo dos 75% exigidos por classe no modo `RunSpecifiedTests`.
+
+A classe de testes agora contém **dois casos adicionais** para exercer o tratamento de `DmlException` via registros de teste excluídos:
+
+- `rejectsCompletionOfDeletedTask`: serviço de tarefas deve traduzir falha DML para erro controlado.
+- `rejectsStageChangeOfDeletedOpportunity`: serviço de oportunidades deve traduzir falha DML para erro controlado.
+
+**Esperado:** 12 métodos de teste aprovados e cobertura de ambas as classes acima de 75%. Os resultados ainda precisam ser comprovados no próximo `dry-run`; não afirmar aprovação até o Salesforce retornar `Succeeded`.
+
 ## Atualizar no IntelliJ (sem ZIP)
 
 ```powershell
@@ -39,7 +50,7 @@ python scripts/validate.py
 sf project deploy start --dry-run --source-dir force-app --target-org salesflow-dev --test-level RunSpecifiedTests --tests SalesFlowControllerTest --wait 20
 ```
 
-Somente se `Status: Succeeded` e 10/10 testes aprovados, implantar **no ambiente de desenvolvimento**:
+Somente se `Status: Succeeded`, 12 testes aprovados e cobertura mínima atendida, implantar **no ambiente de desenvolvimento**:
 
 ```powershell
 sf project deploy start --source-dir force-app --target-org salesflow-dev --test-level RunSpecifiedTests --tests SalesFlowControllerTest --wait 20
