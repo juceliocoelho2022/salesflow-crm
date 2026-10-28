@@ -9,11 +9,11 @@
 - [x] Atualização de etapa e formulário de oportunidade
 - [x] Testes Apex escritos
 - [x] Prévia HTML navegável e CI estático
-- [ ] Deploy executado numa org real
-- [ ] Testes Apex executados numa org real
+- [x] Deploy executado em Salesforce Developer Edition (27/10/2026)
+- [x] 10/10 testes Apex aprovados em deploy real
 - [ ] Captura de telas da aplicação instalada
 
-## v0.2.0 — CRM operacional (código entregue, validação de org pendente)
+## v0.2.0 — CRM operacional (implantada e validada)
 
 - [x] Consultar contatos relacionados a contas com busca e navegação no LWC
 - [x] Filtro por etapa e paginação SOQL no servidor para listagem de oportunidades (20 por página)
@@ -25,7 +25,10 @@
 - [ ] Dashboard com métricas por período e métricas multicurrency
 - [ ] Testes de permissão e sem dados
 
-## v0.3.0 — Arquitetura enterprise
+## v0.3.0 — Arquitetura enterprise (em desenvolvimento)
+
+- [x] Dark Mode no LWC e prévia local, com CI aprovado e deploy Salesforce
+- [x] Services de oportunidades e tarefas extraídos do Controller (código em branch; testes Salesforce pendentes)
 
 - [ ] Camadas Selector, Service e Controller e DTOs próprias
 - [ ] Permissões granularizadas por perfil de negócio
