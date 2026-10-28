@@ -8,7 +8,7 @@
 
 Aplicação de CRM comercial com dashboard, funil de vendas, clientes e tarefas, criada para demonstrar desenvolvimento **nativo no Salesforce**. O projeto usa objetos padrão da plataforma e pode ser implantado em uma **Developer Edition** sem contratação de licença adicional para estudos.
 
-> **Status: v0.2.0 implantada e testada em Salesforce Developer Edition** (deploy `0Afbm00000lOgRFCA0`, 10/10 testes Apex). **Dark Mode v0.3.0** implantado (deploy `0Afbm00000lYBIvCAO`, 10/10 testes Apex) e apresentado na interface Salesforce; a prévia local também utiliza tema Dark. **Arquitetura Enterprise em desenvolvimento na branch**, ainda aguardando validação do novo Service Layer. A prévia utiliza somente dados fictícios e não se conecta ao Salesforce.
+> **Status: v0.2.0 implantada e testada em Salesforce Developer Edition** (deploy `0Afbm00000lOgRFCA0`, 10/10 testes Apex). **Dark Mode v0.3.0** implantado (deploy `0Afbm00000lYBIvCAO`, 10/10 testes Apex) e apresentado na interface Salesforce; a prévia local também utiliza tema Dark. **Service Layer v0.3.0 validada e implantada em Developer Edition** (dry-run `0Afbm00000lXzUgCAK`, deploy real `0Afbm00000lXxO2CAK`, ambos com 12/12 testes Apex aprovados). O PR #3 permanece em revisão até a homologação funcional da interface. A prévia utiliza somente dados fictícios e não se conecta ao Salesforce.
 
 ![Conceito visual SalesFlow CRM](docs/conceito-visual.png)
 
