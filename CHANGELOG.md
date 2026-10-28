@@ -4,7 +4,15 @@ O projeto segue o padrão [Keep a Changelog](https://keepachangelog.com/pt-BR/1.
 
 ## [Unreleased]
 
-- Deploy e testes Apex em Salesforce real permanecem pendentes.
+### Adicionado
+- Dark Mode no LWC Salesforce e na prévia local, com tema padrão escuro e alternância.
+- Camada Service em evolução: `SalesFlowOpportunityService` e `SalesFlowTaskService`; métodos públicos do Controller preservados.
+- Documentação de arquitetura Enterprise e roteiro de dry-run.
+
+### Evidência de implantação (Developer Edition)
+- v0.2.0: deploy `0Afbm00000lOgRFCA0` aprovado com **10/10 testes Apex**.
+- Dark Mode: deploy `0Afbm00000lYBIvCAO` aprovado com **10/10 testes Apex**.
+- Refatoração Service Layer **ainda não validada por deploy na organização**; os testes históricos não são evidência dessa alteração.
 
 ## [0.2.0] — 2026-10-27
 
